@@ -7,7 +7,9 @@
 
 typedef enum {
   TK_RESERVED,
-  TK_NUM,
+  TK_OPEN_PARENTHESIS,  // "("
+  TK_CLOSE_PARENTHESIS, // ")"
+  TK_INT,
   TK_EOF,
 } TokenKind;
 
@@ -104,6 +106,8 @@ Node *primary() {
   return new_node_int(expect_int());
 }
 
+/* tokenizer ********/
+
 Token *token;
 char *user_input;
 
@@ -143,7 +147,7 @@ void expect(char op) {
 }
 
 int expect_int() {
-  if (token->kind != TK_NUM)
+  if (token->kind != TK_INT)
     error_at(token->str, "integer value expected");
   int val = token->val;
   token = token->next;
@@ -161,33 +165,52 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
 }
 
 Token *tokenize(char *p) {
+  printf("tokenize() ---->\n");
   Token head;
   head.next = NULL;
   Token *cur = &head;
 
   while (*p) {
     if (isspace(*p)) {
+      printf("[SP]");
       p++;
       continue;
     }
 
-    if (*p == '+' || *p == '-') {
+    if (*p == '+' || *p == '-' || *p == '*' || *p == '/') {
+      printf("[OP:%c]", *p);
       cur = new_token(TK_RESERVED, cur, p++);
       continue;
     }
 
+    if (*p == '(') {
+      printf("[OPEN_PARE]");
+      cur = new_token(TK_OPEN_PARENTHESIS, cur, p++);
+      continue;
+    }
+
+    if (*p == ')') {
+      printf("[CLOSE_PARE]");
+      cur = new_token(TK_CLOSE_PARENTHESIS, cur, p++);
+      continue;
+    }
+
     if (isdigit(*p)) {
-      cur = new_token(TK_NUM, cur, p);
+      printf("[DIGIT:%c]", *p);
+      cur = new_token(TK_INT, cur, p);
       cur->val = strtol(p, &p, 10);
       continue;
     }
 
+    printf("ERROR\n");
     error_at(token->str, "failed to tokenize");
   }
 
+  printf("\n<---- tokenize()\n");
   new_token(TK_EOF, cur, p);
   return head.next;
 }
+/********* tokenizer */
 
 void gen(Node *node) {
   if (node->kind == ND_INT) {
@@ -232,27 +255,19 @@ int main(int argc, char **argv) {
   }
 
   user_input = argv[1];
-  token = tokenize(argv[1]);
+  token = tokenize(user_input);
+  Node *node = expr();
 
   // foward part of assembly
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
 
-  // the head of expr must be integer
-  printf("  mov rax, %d\n", expect_int());
+  // generate asm with descending node from root
+  gen(node);
 
-  // process sequence of `+ "integer"` | `- "integer"`
-  while (!at_eof()) {
-    if (consume('+')) {
-      printf("  add rax, %d\n", expect_int());
-      continue;
-    }
-
-    expect('-');
-    printf("  sub rax, %d\n", expect_int());
-  }
-
+  // result value must remain in stack-top
+  printf("  pop rax\n");
   printf("  ret\n");
   return 0;
 }
