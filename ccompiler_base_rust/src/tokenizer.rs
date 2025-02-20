@@ -1,10 +1,8 @@
 mod token;
-// use regex::bytes::Match;
-use token::{ReservedTokenKind, Statement, Token, TokenKind, UnreservedTokenKind};
-
-// fn match_regex(regex: regex::bytes::Regex, str: &str) -> Option<Match> {
-//     regex.find(str.as_bytes())
-// }
+use token::{
+    CalcOp, Int, Literal, Operator, ReservedTokenKind, Statement, Token, TokenKind,
+    UnreservedTokenKind,
+};
 
 fn check_token(kind: TokenKind, str: &str, end: &mut usize, token: &mut Token) -> () {
     match kind.regex().find(str.as_bytes()) {
@@ -35,6 +33,36 @@ pub fn get_token(str: &str) -> Option<Token> {
         &mut token,
     );
     check_token(
+        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Add))),
+        str,
+        &mut end,
+        &mut token,
+    );
+    check_token(
+        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Sub))),
+        str,
+        &mut end,
+        &mut token,
+    );
+    check_token(
+        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Mul))),
+        str,
+        &mut end,
+        &mut token,
+    );
+    check_token(
+        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Div))),
+        str,
+        &mut end,
+        &mut token,
+    );
+    check_token(
+        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Mod))),
+        str,
+        &mut end,
+        &mut token,
+    );
+    check_token(
         TokenKind::Reserved(ReservedTokenKind::Statement(Statement::If)),
         str,
         &mut end,
@@ -52,6 +80,18 @@ pub fn get_token(str: &str) -> Option<Token> {
         &mut end,
         &mut token,
     );
+    check_token(
+        TokenKind::Unreseved(UnreservedTokenKind::Literal(Literal::Int(Int::Dec))),
+        str,
+        &mut end,
+        &mut token,
+    );
+    check_token(
+        TokenKind::Unreseved(UnreservedTokenKind::Literal(Literal::Int(Int::Hex))),
+        str,
+        &mut end,
+        &mut token,
+    );
 
     Option::from(token)
 }
@@ -59,7 +99,6 @@ pub fn get_token(str: &str) -> Option<Token> {
 pub fn tokenize(src: &mut str) -> () {
     let mut tokens: std::vec::Vec<Token> = Vec::new();
     let mut remain: &mut str = src;
-    // let token = get_token(remain);
 
     loop {
         let token = get_token(remain);
@@ -80,18 +119,4 @@ pub fn tokenize(src: &mut str) -> () {
             }
         }
     }
-    //
-    // match token {
-    //     Some(token) => {
-    //         remain = &mut remain[token.string.len()..];
-    //         while () {}
-    //     }
-    //     None => {}
-    // }
-    // match token {
-    //     Some(token) => {
-    //         remain = &mut remain[token.string.len()..];
-    //     }
-    //     None => {}
-    // }
 }

@@ -73,7 +73,7 @@ impl TokenKind {
             TokenKind::Unreseved(unreserved) => match unreserved {
                 UnreservedTokenKind::Literal(literal) => match literal {
                     Literal::Int(int) => match int {
-                        Int::Dec => Regex::new(r"^0|([1-9][0-9]*)").unwrap(),
+                        Int::Dec => Regex::new(r"^0|^([1-9][0-9]*)").unwrap(),
                         Int::Hex => Regex::new(r"^0x[0-9a-fA-F]+").unwrap(),
                     },
                 },

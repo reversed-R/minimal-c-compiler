@@ -13,6 +13,6 @@ fn main() {
     // println!("----");
     // tokenizer::match_token("ifssfad");
     // println!("----");
-    let mut str = String::from("if  fnwo ifnfewo fiwejo if  fjei");
+    let mut str = String::from("if  /fnwo0x89 0x7a if0xd5 32 *% ifn**fewo fiwejo if  fjei");
     tokenizer::tokenize(&mut str);
 }
