@@ -2,4 +2,5 @@ tmp*
 *.out
 *.o
 mycc
-**/target
+**/target/
+**/debug/
