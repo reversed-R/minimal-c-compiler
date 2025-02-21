@@ -75,19 +75,19 @@ pub fn get_token(str: &str) -> Option<Token> {
         &mut token,
     );
     check_token(
-        TokenKind::Unreseved(UnreservedTokenKind::Identifier),
+        TokenKind::Unreserved(UnreservedTokenKind::Identifier),
         str,
         &mut end,
         &mut token,
     );
     check_token(
-        TokenKind::Unreseved(UnreservedTokenKind::Literal(Literal::Int(Int::Dec))),
+        TokenKind::Unreserved(UnreservedTokenKind::Literal(Literal::Int(Int::Dec))),
         str,
         &mut end,
         &mut token,
     );
     check_token(
-        TokenKind::Unreseved(UnreservedTokenKind::Literal(Literal::Int(Int::Hex))),
+        TokenKind::Unreserved(UnreservedTokenKind::Literal(Literal::Int(Int::Hex))),
         str,
         &mut end,
         &mut token,

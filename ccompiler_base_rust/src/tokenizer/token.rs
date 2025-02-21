@@ -6,7 +6,7 @@ use regex::bytes::Regex;
 pub enum TokenKind {
     All,
     Reserved(ReservedTokenKind),
-    Unreseved(UnreservedTokenKind),
+    Unreserved(UnreservedTokenKind),
     EOF,
 }
 
@@ -23,8 +23,8 @@ impl TerminalTrait for TokenKind {
                 TokenKind::Reserved(reserved_kind) => reserved.contains(reserved_kind),
                 _ => false,
             },
-            TokenKind::Unreseved(unreserved) => match kind {
-                TokenKind::Unreseved(unreserved_kind) => unreserved.contains(unreserved_kind),
+            TokenKind::Unreserved(unreserved) => match kind {
+                TokenKind::Unreserved(unreserved_kind) => unreserved.contains(unreserved_kind),
                 _ => false,
             },
 
@@ -255,7 +255,7 @@ impl TokenKind {
                 },
                 ReservedTokenKind::All => Regex::new(r"").unwrap(),
             },
-            TokenKind::Unreseved(unreserved) => match unreserved {
+            TokenKind::Unreserved(unreserved) => match unreserved {
                 UnreservedTokenKind::Literal(literal) => match literal {
                     Literal::Int(int) => match int {
                         Int::Dec => Regex::new(r"^0|^([1-9][0-9]*)").unwrap(),

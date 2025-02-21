@@ -49,7 +49,7 @@ impl Nonterminal {
         match self {
             Nonterminal::Expr(expr) => match expr {
                 Expr::Calc => {
-                    vec![Symbol::Terminal(TokenKind::Unreseved(
+                    vec![Symbol::Terminal(TokenKind::Unreserved(
                         UnreservedTokenKind::Identifier,
                     ))]
                 }
@@ -57,12 +57,12 @@ impl Nonterminal {
             Nonterminal::Stat(stat) => match stat {
                 Stat::ExprStat(expr) => match expr {
                     ExprStat::Identifier => {
-                        vec![Symbol::Terminal(TokenKind::Unreseved(
+                        vec![Symbol::Terminal(TokenKind::Unreserved(
                             UnreservedTokenKind::Identifier,
                         ))]
                     }
                     ExprStat::Literal => {
-                        vec![Symbol::Terminal(TokenKind::Unreseved(
+                        vec![Symbol::Terminal(TokenKind::Unreserved(
                             UnreservedTokenKind::Literal(Literal::All),
                         ))]
                     }
