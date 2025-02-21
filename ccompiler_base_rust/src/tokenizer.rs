@@ -1,4 +1,4 @@
-mod token;
+pub mod token;
 use token::{
     CalcOp, Int, Literal, Operator, ReservedTokenKind, Statement, Token, TokenKind,
     UnreservedTokenKind,
