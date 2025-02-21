@@ -1,12 +1,12 @@
 use std::vec;
 
 use crate::tokenizer::token::{
-    CalcOp, Int, Literal, Operator, ReservedTokenKind, Statement, Token, TokenKind,
-    UnreservedTokenKind,
+    Brace, CalcOp, Int, Literal, Operator, Parenthesis, ReservedTokenKind, Statement, Token,
+    TokenKind, UnreservedTokenKind,
 };
 
 pub trait SymbolTrait {
-    fn all(&self) -> Self;
+    fn all() -> Self;
 }
 
 pub trait NonterminalTrait {
@@ -17,11 +17,13 @@ pub trait TerminalTrait {
     fn contains(&self, kind: &Self) -> bool;
 }
 
+#[derive(Debug)]
 pub enum Symbol {
     Terminal(TokenKind),
     Nonterminal(Nonterminal),
 }
 
+#[derive(Debug)]
 pub enum Nonterminal {
     All,
     Expr(Expr),
@@ -37,6 +39,7 @@ impl NonterminalTrait for Nonterminal {
     }
 }
 
+#[derive(Debug)]
 pub enum Expr {
     All,
     Calc,
@@ -52,6 +55,7 @@ impl NonterminalTrait for Expr {
     }
 }
 
+#[derive(Debug)]
 pub enum Stat {
     All,
     ControlStat(ControlStat),
@@ -67,11 +71,7 @@ impl NonterminalTrait for Stat {
     }
 }
 
-// pub enum ExprStat {
-//     Identifier,
-//     Literal,
-// }
-
+#[derive(Debug)]
 pub enum ControlStat {
     All,
     If,
@@ -81,14 +81,34 @@ impl NonterminalTrait for ControlStat {
     fn symbols(&self) -> Vec<Symbol> {
         match self {
             ControlStat::If => {
-                vec![Symbol::Terminal(TokenKind::Reserved(
-                    ReservedTokenKind::Statement(Statement::If),
-                ))]
+                vec![
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Statement(
+                        Statement::If,
+                    ))),
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Parenthesis(
+                        Parenthesis::Open,
+                    ))),
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Parenthesis(
+                        Parenthesis::Close,
+                    ))),
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Brace(Brace::Open))),
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Brace(Brace::Close))),
+                ]
             }
             ControlStat::While => {
-                vec![Symbol::Terminal(TokenKind::Reserved(
-                    ReservedTokenKind::Statement(Statement::While),
-                ))]
+                vec![
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Statement(
+                        Statement::While,
+                    ))),
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Parenthesis(
+                        Parenthesis::Open,
+                    ))),
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Parenthesis(
+                        Parenthesis::Close,
+                    ))),
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Brace(Brace::Open))),
+                    Symbol::Terminal(TokenKind::Reserved(ReservedTokenKind::Brace(Brace::Close))),
+                ]
             }
             ControlStat::All => vec![],
         }

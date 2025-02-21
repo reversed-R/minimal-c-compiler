@@ -1,4 +1,4 @@
-use symbol::{Expr, NonterminalTrait, Stat, Symbol, TerminalTrait};
+use symbol::{ControlStat, Expr, NonterminalTrait, Stat, Symbol, TerminalTrait};
 
 use crate::tokenizer::token::Token;
 
@@ -14,6 +14,10 @@ pub fn parse(tokens: Vec<Token>) -> bool {
         println!("Stat::ExprStat");
         result = true;
     }
+    if match_symbols(&Stat::ControlStat(ControlStat::If).symbols(), 0, &tokens, 0) {
+        println!("ControlStat::If");
+        result = true;
+    }
 
     result
 }
@@ -24,12 +28,25 @@ pub fn match_symbols(
     terminals: &Vec<Token>,
     terms_index: usize,
 ) -> bool {
+    println!("match_symbols()---->");
     match symbols.get(syms_index) {
         Some(symbol) => match symbol {
-            Symbol::Terminal(terminal) => match terminals.get(0) {
+            Symbol::Terminal(terminal) => match terminals.get(terms_index) {
                 Some(token) => {
+                    println!(
+                        "Symbol[{}]: {:?},\nTerminals[{}]: {:?}",
+                        syms_index, symbol, terms_index, token
+                    );
                     if terminal.contains(&token.kind) {
-                        match_symbols(symbols, syms_index + 1, terminals, terms_index + 1)
+                        if symbols.len() > syms_index + 1 && terminals.len() > terms_index + 1 {
+                            match_symbols(symbols, syms_index + 1, terminals, terms_index + 1)
+                        } else if symbols.len() == syms_index + 1
+                            && terminals.len() == terms_index + 1
+                        {
+                            true
+                        } else {
+                            false
+                        }
                     // must make symbols[1..], terminals[1..]
                     } else {
                         false
@@ -41,6 +58,6 @@ pub fn match_symbols(
                 match_symbols(&nonterminal.symbols(), syms_index, terminals, terms_index)
             }
         },
-        None => false,
+        None => symbols.len() == syms_index && terminals.len() == terms_index,
     }
 }

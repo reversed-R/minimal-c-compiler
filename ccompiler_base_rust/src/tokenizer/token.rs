@@ -15,7 +15,7 @@ pub enum TokenKind {
 }
 
 impl SymbolTrait for TokenKind {
-    fn all(&self) -> Self {
+    fn all() -> Self {
         TokenKind::All
     }
 }
@@ -41,11 +41,14 @@ impl TerminalTrait for TokenKind {
 pub enum ReservedTokenKind {
     All,
     WhiteSpaces,
+    Parenthesis(Parenthesis),
+    Brace(Brace),
+    Semicolon,
     Operator(Operator),
     Statement(Statement),
 }
 impl SymbolTrait for ReservedTokenKind {
-    fn all(&self) -> Self {
+    fn all() -> Self {
         ReservedTokenKind::All
     }
 }
@@ -65,6 +68,62 @@ impl TerminalTrait for ReservedTokenKind {
                 ReservedTokenKind::WhiteSpaces => true,
                 _ => false,
             },
+            ReservedTokenKind::Parenthesis(pare) => match kind {
+                ReservedTokenKind::Parenthesis(pare_kind) => pare.contains(pare_kind),
+                _ => false,
+            },
+            ReservedTokenKind::Brace(brace) => match kind {
+                ReservedTokenKind::Brace(brace_kind) => brace.contains(brace_kind),
+                _ => false,
+            },
+            ReservedTokenKind::Semicolon => match kind {
+                ReservedTokenKind::Semicolon => true,
+                _ => false,
+            },
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum Parenthesis {
+    All,
+    Open,
+    Close,
+}
+impl TerminalTrait for Parenthesis {
+    fn contains(&self, kind: &Self) -> bool {
+        match self {
+            Self::All => true,
+            Self::Open => match kind {
+                Self::Open => true,
+                _ => false,
+            },
+            Self::Close => match kind {
+                Self::Close => true,
+                _ => false,
+            },
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum Brace {
+    All,
+    Open,
+    Close,
+}
+impl TerminalTrait for Brace {
+    fn contains(&self, kind: &Self) -> bool {
+        match self {
+            Self::All => true,
+            Self::Open => match kind {
+                Self::Open => true,
+                _ => false,
+            },
+            Self::Close => match kind {
+                Self::Close => true,
+                _ => false,
+            },
         }
     }
 }
@@ -75,7 +134,7 @@ pub enum Operator {
     Calc(CalcOp),
 }
 impl SymbolTrait for Operator {
-    fn all(&self) -> Self {
+    fn all() -> Self {
         Operator::All
     }
 }
@@ -101,7 +160,7 @@ pub enum CalcOp {
     Mod, // "%"
 }
 impl SymbolTrait for CalcOp {
-    fn all(&self) -> Self {
+    fn all() -> Self {
         CalcOp::All
     }
 }
@@ -140,7 +199,7 @@ pub enum Statement {
     While,
 }
 impl SymbolTrait for Statement {
-    fn all(&self) -> Self {
+    fn all() -> Self {
         Statement::All
     }
 }
@@ -167,7 +226,7 @@ pub enum UnreservedTokenKind {
     Identifier,
 }
 impl SymbolTrait for UnreservedTokenKind {
-    fn all(&self) -> Self {
+    fn all() -> Self {
         UnreservedTokenKind::All
     }
 }
@@ -193,7 +252,7 @@ pub enum Literal {
     Int(Int),
 }
 impl SymbolTrait for Literal {
-    fn all(&self) -> Self {
+    fn all() -> Self {
         Literal::All
     }
 }
@@ -216,7 +275,7 @@ pub enum Int {
     Hex,
 }
 impl SymbolTrait for Int {
-    fn all(&self) -> Self {
+    fn all() -> Self {
         Int::All
     }
 }
@@ -241,6 +300,17 @@ impl TokenKind {
         match &self {
             TokenKind::Reserved(reserved) => match reserved {
                 ReservedTokenKind::WhiteSpaces => Regex::new(r"^[ ]+").unwrap(),
+                ReservedTokenKind::Parenthesis(pare) => match pare {
+                    Parenthesis::Open => Regex::new(r"^\(").unwrap(),
+                    Parenthesis::Close => Regex::new(r"^\)").unwrap(),
+                    Parenthesis::All => Regex::new(r"").unwrap(),
+                },
+                ReservedTokenKind::Brace(brace) => match brace {
+                    Brace::Open => Regex::new(r"^\{").unwrap(),
+                    Brace::Close => Regex::new(r"^\}").unwrap(),
+                    Brace::All => Regex::new(r"").unwrap(),
+                },
+                ReservedTokenKind::Semicolon => Regex::new(r"^;").unwrap(),
                 ReservedTokenKind::Operator(operator) => match operator {
                     Operator::Calc(calc_operator) => match calc_operator {
                         CalcOp::Add => Regex::new(r"^\+").unwrap(),

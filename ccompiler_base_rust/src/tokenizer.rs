@@ -1,7 +1,7 @@
 pub mod token;
 use token::{
-    CalcOp, Int, Literal, Operator, ReservedTokenKind, Statement, Token, TokenKind,
-    UnreservedTokenKind,
+    Brace, CalcOp, Int, Literal, Operator, Parenthesis, ReservedTokenKind, Statement, Token,
+    TokenKind, UnreservedTokenKind,
 };
 
 fn check_token(kind: TokenKind, str: &str, end: &mut usize, token: &mut Token) -> () {
@@ -25,73 +25,142 @@ pub fn get_token(str: &str) -> Option<Token> {
     let mut end: usize = 0;
     let mut token = Token::new(TokenKind::EOF, String::from(""));
 
-    check_token(TokenKind::EOF, str, &mut end, &mut token);
-    check_token(
-        TokenKind::Reserved(ReservedTokenKind::WhiteSpaces),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Add))),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Sub))),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Mul))),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Div))),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Mod))),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Reserved(ReservedTokenKind::Statement(Statement::If)),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Reserved(ReservedTokenKind::Statement(Statement::While)),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Unreserved(UnreservedTokenKind::Identifier),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Unreserved(UnreservedTokenKind::Literal(Literal::Int(Int::Dec))),
-        str,
-        &mut end,
-        &mut token,
-    );
-    check_token(
-        TokenKind::Unreserved(UnreservedTokenKind::Literal(Literal::Int(Int::Hex))),
-        str,
-        &mut end,
-        &mut token,
-    );
+    let mut check_token_closure = |kind: TokenKind| {
+        check_token(kind, str, &mut end, &mut token);
+    };
+
+    check_token_closure(TokenKind::EOF);
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::WhiteSpaces));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::WhiteSpaces));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Parenthesis(
+        Parenthesis::Open,
+    )));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Parenthesis(
+        Parenthesis::Close,
+    )));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Brace(Brace::Open)));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Brace(Brace::Close)));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Semicolon));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Operator(
+        Operator::Calc(CalcOp::Add),
+    )));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Operator(
+        Operator::Calc(CalcOp::Sub),
+    )));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Operator(
+        Operator::Calc(CalcOp::Mul),
+    )));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Operator(
+        Operator::Calc(CalcOp::Div),
+    )));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Operator(
+        Operator::Calc(CalcOp::Mod),
+    )));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Statement(
+        Statement::If,
+    )));
+    check_token_closure(TokenKind::Reserved(ReservedTokenKind::Statement(
+        Statement::While,
+    )));
+    check_token_closure(TokenKind::Unreserved(UnreservedTokenKind::Identifier));
+    check_token_closure(TokenKind::Unreserved(UnreservedTokenKind::Literal(
+        Literal::Int(Int::Dec),
+    )));
+    check_token_closure(TokenKind::Unreserved(UnreservedTokenKind::Literal(
+        Literal::Int(Int::Hex),
+    )));
+
+    // check_token(TokenKind::EOF, str, &mut end, &mut token);
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::WhiteSpaces),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Parenthesis(Parenthesis::Open)),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Parenthesis(Parenthesis::Close)),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Brace(Brace::Open)),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Brace(Brace::Close)),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Add))),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Sub))),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Mul))),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Div))),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Operator(Operator::Calc(CalcOp::Mod))),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Statement(Statement::If)),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Reserved(ReservedTokenKind::Statement(Statement::While)),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Unreserved(UnreservedTokenKind::Identifier),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Unreserved(UnreservedTokenKind::Literal(Literal::Int(Int::Dec))),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
+    // check_token(
+    //     TokenKind::Unreserved(UnreservedTokenKind::Literal(Literal::Int(Int::Hex))),
+    //     str,
+    //     &mut end,
+    //     &mut token,
+    // );
 
     Option::from(token)
 }
