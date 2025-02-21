@@ -96,7 +96,7 @@ pub fn get_token(str: &str) -> Option<Token> {
     Option::from(token)
 }
 
-pub fn tokenize(src: &mut str) -> () {
+pub fn tokenize(src: &mut str) -> Vec<Token> {
     let mut tokens: std::vec::Vec<Token> = Vec::new();
     let mut remain: &mut str = src;
 
@@ -106,7 +106,7 @@ pub fn tokenize(src: &mut str) -> () {
             Some(token) => match token.kind {
                 TokenKind::EOF => {
                     println!("[EOF]");
-                    break;
+                    return tokens;
                 }
                 _ => {
                     println!("[{:?}]", token);

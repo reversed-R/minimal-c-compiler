@@ -1,15 +1,27 @@
-use symbol::{Symbol, TerminalTrait};
+use symbol::{Expr, NonterminalTrait, Stat, Symbol, TerminalTrait};
 
 use crate::tokenizer::token::Token;
 
 pub mod symbol;
 
-pub fn parse(tokens: Vec<Token>) -> (bool) {}
+pub fn parse(tokens: Vec<Token>) -> bool {
+    let mut result = false;
+    if match_symbols(&Expr::Calc.symbols(), 0, &tokens, 0) {
+        println!("Expr::Calc");
+        result = true;
+    }
+    if match_symbols(&Stat::ExprStat.symbols(), 0, &tokens, 0) {
+        println!("Stat::ExprStat");
+        result = true;
+    }
+
+    result
+}
 
 pub fn match_symbols(
-    symbols: Vec<Symbol>,
+    symbols: &Vec<Symbol>,
     syms_index: usize,
-    terminals: Vec<Token>,
+    terminals: &Vec<Token>,
     terms_index: usize,
 ) -> bool {
     match symbols.get(syms_index) {
@@ -26,7 +38,7 @@ pub fn match_symbols(
                 None => false,
             },
             Symbol::Nonterminal(nonterminal) => {
-                match_symbols(nonterminal.symbols(), syms_index, terminals, terms_index)
+                match_symbols(&nonterminal.symbols(), syms_index, terminals, terms_index)
             }
         },
         None => false,
