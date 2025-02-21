@@ -1,6 +1,10 @@
 use crate::syntax_parser::symbol::{SymbolTrait, TerminalTrait};
 use regex::bytes::Regex;
 
+// pub trait TokenKindTrait {
+//     fn regex(&self) -> Regex;
+// }
+
 // TokenKind and their children enum must has All to express their all children
 #[derive(Debug)]
 pub enum TokenKind {

@@ -1,27 +1,33 @@
-use std::collections::VecDeque;
-
 use symbol::{Symbol, TerminalTrait};
 
 use crate::tokenizer::token::Token;
 
 pub mod symbol;
 
-pub fn parse() -> () {}
+pub fn parse(tokens: Vec<Token>) -> (bool) {}
 
-pub fn match_symbols(symbols: VecDeque<Symbol>, terminals: VecDeque<Token>) -> bool {
-    match symbols.get(0) {
+pub fn match_symbols(
+    symbols: Vec<Symbol>,
+    syms_index: usize,
+    terminals: Vec<Token>,
+    terms_index: usize,
+) -> bool {
+    match symbols.get(syms_index) {
         Some(symbol) => match symbol {
             Symbol::Terminal(terminal) => match terminals.get(0) {
                 Some(token) => {
                     if terminal.contains(&token.kind) {
-                        match_symbols(symbols, terminals) // must make symbols[1..], terminals[1..]
+                        match_symbols(symbols, syms_index + 1, terminals, terms_index + 1)
+                    // must make symbols[1..], terminals[1..]
                     } else {
                         false
                     }
                 }
                 None => false,
             },
-            Symbol::Nonterminal(nonterminal) => false, //match_symbols(nonterminal.symbols(), terminals),
+            Symbol::Nonterminal(nonterminal) => {
+                match_symbols(nonterminal.symbols(), syms_index, terminals, terms_index)
+            }
         },
         None => false,
     }

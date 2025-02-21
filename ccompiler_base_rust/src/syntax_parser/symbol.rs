@@ -1,3 +1,5 @@
+use std::vec;
+
 use crate::tokenizer::token::{
     CalcOp, Int, Literal, Operator, ReservedTokenKind, Statement, Token, TokenKind,
     UnreservedTokenKind,
@@ -21,66 +23,111 @@ pub enum Symbol {
 }
 
 pub enum Nonterminal {
+    All,
     Expr(Expr),
     Stat(Stat),
 }
+impl NonterminalTrait for Nonterminal {
+    fn symbols(&self) -> Vec<Symbol> {
+        match self {
+            Self::All => vec![],
+            Nonterminal::Expr(expr) => expr.symbols(),
+            Nonterminal::Stat(stat) => stat.symbols(),
+        }
+    }
+}
 
 pub enum Expr {
+    All,
     Calc,
+}
+impl NonterminalTrait for Expr {
+    fn symbols(&self) -> Vec<Symbol> {
+        match self {
+            Expr::Calc => vec![Symbol::Terminal(TokenKind::Unreserved(
+                UnreservedTokenKind::All,
+            ))],
+            Self::All => vec![],
+        }
+    }
 }
 
 pub enum Stat {
+    All,
     ControlStat(ControlStat),
-    ExprStat(ExprStat),
+    ExprStat,
+}
+impl NonterminalTrait for Stat {
+    fn symbols(&self) -> Vec<Symbol> {
+        match self {
+            Stat::ExprStat => vec![Symbol::Nonterminal(Nonterminal::Expr(Expr::All))],
+            Stat::ControlStat(control_stat) => control_stat.symbols(),
+            Stat::All => vec![],
+        }
+    }
 }
 
-pub enum ExprStat {
-    Identifier,
-    Literal,
-}
+// pub enum ExprStat {
+//     Identifier,
+//     Literal,
+// }
 
 pub enum ControlStat {
+    All,
     If,
     While,
 }
-
-impl Nonterminal {
-    pub fn symbols(&self) -> Vec<Symbol> {
+impl NonterminalTrait for ControlStat {
+    fn symbols(&self) -> Vec<Symbol> {
         match self {
-            Nonterminal::Expr(expr) => match expr {
-                Expr::Calc => {
-                    vec![Symbol::Terminal(TokenKind::Unreserved(
-                        UnreservedTokenKind::Identifier,
-                    ))]
-                }
-            },
-            Nonterminal::Stat(stat) => match stat {
-                Stat::ExprStat(expr) => match expr {
-                    ExprStat::Identifier => {
-                        vec![Symbol::Terminal(TokenKind::Unreserved(
-                            UnreservedTokenKind::Identifier,
-                        ))]
-                    }
-                    ExprStat::Literal => {
-                        vec![Symbol::Terminal(TokenKind::Unreserved(
-                            UnreservedTokenKind::Literal(Literal::All),
-                        ))]
-                    }
-                },
-                Stat::ControlStat(control) => match control {
-                    ControlStat::If => {
-                        vec![Symbol::Terminal(TokenKind::Reserved(
-                            ReservedTokenKind::Statement(Statement::If),
-                        ))]
-                    }
-                    ControlStat::While => {
-                        vec![Symbol::Terminal(TokenKind::Reserved(
-                            ReservedTokenKind::Statement(Statement::While),
-                        ))]
-                    }
-                },
-            },
+            ControlStat::If => {
+                vec![Symbol::Terminal(TokenKind::Reserved(
+                    ReservedTokenKind::Statement(Statement::If),
+                ))]
+            }
+            ControlStat::While => {
+                vec![Symbol::Terminal(TokenKind::Reserved(
+                    ReservedTokenKind::Statement(Statement::While),
+                ))]
+            }
+            ControlStat::All => vec![],
         }
-        // vec![Symbol::Nonterminal(Nonterminal::Expr(Expr::Calc))]
     }
 }
+
+// impl Nonterminal {
+//     pub fn symbols(&self) -> Vec<Symbol> {
+//         match self {
+//             Nonterminal::Expr(expr) => match expr {
+//                 Expr::Calc => {
+//                     vec![Symbol::Terminal(TokenKind::Unreserved(
+//                         UnreservedTokenKind::All,
+//                     ))]
+//                 }
+//                 Expr::All => vec![],
+//             },
+//             Nonterminal::Stat(stat) => match stat {
+//                 Stat::ExprStat => vec![Symbol::Terminal(TokenKind::Unreserved(
+//                     UnreservedTokenKind::All,
+//                 ))],
+//
+//                 Stat::ControlStat(control) => match control {
+//                     ControlStat::If => {
+//                         vec![Symbol::Terminal(TokenKind::Reserved(
+//                             ReservedTokenKind::Statement(Statement::If),
+//                         ))]
+//                     }
+//                     ControlStat::While => {
+//                         vec![Symbol::Terminal(TokenKind::Reserved(
+//                             ReservedTokenKind::Statement(Statement::While),
+//                         ))]
+//                     }
+//                     ControlStat::All => vec![],
+//                 },
+//                 Stat::All => vec![],
+//             },
+//             Nonterminal::All => vec![],
+//         }
+//         // vec![Symbol::Nonterminal(Nonterminal::Expr(Expr::Calc))]
+//     }
+// }
