@@ -6,18 +6,22 @@ pub mod symbol;
 
 pub fn parse(tokens: Vec<Token>) -> bool {
     let mut result = false;
+    println!("parse()---->");
     if match_symbols(&Expr::Calc.symbols(), 0, &tokens, 0) {
         println!("Expr::Calc");
         result = true;
     }
+    println!("------");
     if match_symbols(&Stat::ExprStat.symbols(), 0, &tokens, 0) {
         println!("Stat::ExprStat");
         result = true;
     }
+    println!("------");
     if match_symbols(&Stat::ControlStat(ControlStat::If).symbols(), 0, &tokens, 0) {
         println!("ControlStat::If");
         result = true;
     }
+    println!("------");
 
     result
 }
@@ -55,6 +59,7 @@ pub fn match_symbols(
                 None => false,
             },
             Symbol::Nonterminal(nonterminal) => {
+                println!("Symbol[{}]: {:?}", syms_index, nonterminal,);
                 match_symbols(&nonterminal.symbols(), syms_index, terminals, terms_index)
             }
         },
