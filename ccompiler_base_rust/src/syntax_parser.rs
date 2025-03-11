@@ -26,53 +26,90 @@ pub fn parse(tokens: Vec<Token>) -> bool {
     result
 }
 
-pub struct Node<'a> {
+pub struct SymMatch<'a> {
     sym: &'a Sym,
-    terms: &'a Vec<Term>,
+    tokens: &'a Slice<'a, Token>,
 }
 
-pub fn match_syms_slice(syms_slice: &Slice<Syms>, terms: &Slice<Term>) -> bool {
-    false
+impl<'a> SymMatch<'a> {
+    pub fn new(sym: &'a Sym, tokens: &'a Slice<'a, Token>) -> Self {
+        Self { sym, tokens }
+    }
 }
 
-pub fn match_syms(syms: &Syms, terms: &Slice<Term>) -> bool {
+pub fn match_syms_slice<'a>(
+    syms_slice: &'a Slice<Syms>,
+    tokens: &'a Slice<Token>,
+) -> Option<SymMatch<'a>> {
+    let mut index = syms_slice.range().start;
+    let mut result: Option<SymMatch<'a>> = None;
+
+    while index < syms_slice.range().end {
+        if let Some(syms) = syms_slice.vec().get(index) {
+            match match_syms(syms, tokens) {
+                Some(matched) => {
+                    result = Some(matched);
+                }
+                None => {}
+            }
+        }
+        index += 1;
+    }
+
+    result
+}
+
+pub fn match_syms<'a>(syms: &'a Syms, tokens: &'a Slice<Token>) -> Option<SymMatch<'a>> {
     match syms {
         Syms::Natural(vec) => {
             let mut count = 0;
             loop {
-                if !match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), terms) {
-                    break;
+                match match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), tokens) {
+                    Some(_) => {}
+                    None => break,
                 }
                 count += 1;
             }
 
-            count > 0
+            None
         }
         Syms::Multi(vec) => {
             let mut count = 0;
             loop {
-                if !match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), terms) {
-                    break;
+                match match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), tokens) {
+                    Some(_) => {}
+                    None => break,
                 }
                 count += 1;
             }
 
-            true
+            None
         }
-        Syms::One(vec) => match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), terms),
+        Syms::One(vec) => match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), tokens),
         Syms::Option(vec) => {
-            match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), terms);
-            true
+            match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), tokens);
+            None
         }
         Syms::Sym(sym) => match sym {
             Sym::Term(term) => {
-                if let Some(terms_at_start) = terms.vec().get(terms.range().start) {
-                    term == terms_at_start
+                if let Some(token) = tokens.vec().get(tokens.range().start) {
+                    if term == token.term() {
+                        Some(SymMatch::new(
+                            sym,
+                            &Slice::new(
+                                tokens.vec(),
+                                tokens.range().start,
+                                EndIndex::I(tokens.range().start + 1),
+                            ),
+                        ))
+                    } else {
+                        None
+                    }
                 } else {
-                    false
+                    None
                 }
             }
-            Sym::Nonterm(nonterm) => match_syms(&nonterm.syms(), terms),
+            Sym::Nonterm(nonterm) => match_syms(&nonterm.syms(), tokens),
         },
         Syms::Choices(choices) => {
             let mut index = 0;
@@ -81,13 +118,13 @@ pub fn match_syms(syms: &Syms, terms: &Slice<Term>) -> bool {
             loop {
                 match choices.get(index) {
                     Some(syms) => {
-                        match_syms(&syms, terms);
+                        match_syms(&syms, tokens);
                     }
                     None => break,
                 }
                 index += 1;
             }
-            false
+            None
         }
     }
 }
