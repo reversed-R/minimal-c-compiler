@@ -2,15 +2,15 @@ use getset::Getters;
 use std::ops::Range;
 
 #[derive(Debug, Getters)]
-pub struct Slice<'a, T> {
+pub struct Slice<T: Clone> {
     #[getset(get = "pub")]
-    vec: &'a Vec<T>,
+    vec: Vec<T>,
     #[getset(get = "pub")]
     range: Range<usize>,
 }
 
-impl<'a, T> Slice<'a, T> {
-    pub fn new(vec: &'a Vec<T>, start: usize, end: EndIndex) -> Self {
+impl<T: Clone> Slice<T> {
+    pub fn new(vec: Vec<T>, start: usize, end: EndIndex) -> Self {
         let end = match end {
             EndIndex::I(i) => {
                 if i < vec.len() {
@@ -26,6 +26,14 @@ impl<'a, T> Slice<'a, T> {
             vec,
             range: Range { start, end },
         }
+    }
+
+    pub fn clone(&self) -> Self {
+        Self::new(
+            self.vec().clone(),
+            self.range().start,
+            EndIndex::I(self.range().end),
+        )
     }
 }
 

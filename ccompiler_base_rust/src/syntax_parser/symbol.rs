@@ -1,7 +1,7 @@
 use crate::tokenizer::token::Terminal as Term;
 use std::vec;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Syms {
     Natural(Vec<Syms>),
     Multi(Vec<Syms>),
@@ -11,13 +11,13 @@ pub enum Syms {
     Choices(Vec<Syms>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Sym {
     Term(Term),
     Nonterm(Nonterm),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Nonterm {
     Expr,
     Stat,

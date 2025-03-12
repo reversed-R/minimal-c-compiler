@@ -2,7 +2,7 @@ use getset::Getters;
 // use crate::syntax_parser::symbol::{SymbolTrait, TerminalTrait};
 use regex::bytes::Regex;
 
-#[derive(Debug, Getters, PartialEq)]
+#[derive(Debug, Getters, PartialEq, Clone)]
 pub struct Token {
     #[getset(get = "pub")]
     term: Terminal,
@@ -16,7 +16,7 @@ impl Token {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Terminal {
     PareOpen,      // "("
     PareClose,     // ")"

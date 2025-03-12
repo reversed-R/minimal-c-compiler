@@ -26,27 +26,24 @@ pub fn parse(tokens: Vec<Token>) -> bool {
     result
 }
 
-pub struct SymMatch<'a> {
-    sym: &'a Sym,
-    tokens: &'a Slice<'a, Token>,
+pub struct SymMatch {
+    sym: Sym,
+    tokens: Slice<Token>,
 }
 
-impl<'a> SymMatch<'a> {
-    pub fn new(sym: &'a Sym, tokens: &'a Slice<'a, Token>) -> Self {
+impl SymMatch {
+    pub fn new(sym: Sym, tokens: Slice<Token>) -> Self {
         Self { sym, tokens }
     }
 }
 
-pub fn match_syms_slice<'a>(
-    syms_slice: &'a Slice<Syms>,
-    tokens: &'a Slice<Token>,
-) -> Option<SymMatch<'a>> {
+pub fn match_syms_slice<'a>(syms_slice: Slice<Syms>, tokens: Slice<Token>) -> Option<SymMatch> {
     let mut index = syms_slice.range().start;
-    let mut result: Option<SymMatch<'a>> = None;
+    let mut result: Option<SymMatch> = None;
 
     while index < syms_slice.range().end {
         if let Some(syms) = syms_slice.vec().get(index) {
-            match match_syms(syms, tokens) {
+            match match_syms(syms.clone(), tokens.clone()) {
                 Some(matched) => {
                     result = Some(matched);
                 }
@@ -59,12 +56,13 @@ pub fn match_syms_slice<'a>(
     result
 }
 
-pub fn match_syms<'a>(syms: &'a Syms, tokens: &'a Slice<Token>) -> Option<SymMatch<'a>> {
+pub fn match_syms<'a>(syms: Syms, tokens: Slice<Token>) -> Option<SymMatch> {
     match syms {
         Syms::Natural(vec) => {
             let mut count = 0;
             loop {
-                match match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), tokens) {
+                match match_syms_slice(Slice::new(vec.clone(), 0, EndIndex::ToEnd), tokens.clone())
+                {
                     Some(_) => {}
                     None => break,
                 }
@@ -76,7 +74,8 @@ pub fn match_syms<'a>(syms: &'a Syms, tokens: &'a Slice<Token>) -> Option<SymMat
         Syms::Multi(vec) => {
             let mut count = 0;
             loop {
-                match match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), tokens) {
+                match match_syms_slice(Slice::new(vec.clone(), 0, EndIndex::ToEnd), tokens.clone())
+                {
                     Some(_) => {}
                     None => break,
                 }
@@ -85,19 +84,19 @@ pub fn match_syms<'a>(syms: &'a Syms, tokens: &'a Slice<Token>) -> Option<SymMat
 
             None
         }
-        Syms::One(vec) => match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), tokens),
+        Syms::One(vec) => match_syms_slice(Slice::new(vec, 0, EndIndex::ToEnd), tokens),
         Syms::Option(vec) => {
-            match_syms_slice(&Slice::new(vec, 0, EndIndex::ToEnd), tokens);
+            match_syms_slice(Slice::new(vec, 0, EndIndex::ToEnd), tokens);
             None
         }
         Syms::Sym(sym) => match sym {
             Sym::Term(term) => {
                 if let Some(token) = tokens.vec().get(tokens.range().start) {
-                    if term == token.term() {
+                    if &term == token.term() {
                         Some(SymMatch::new(
-                            sym,
-                            &Slice::new(
-                                tokens.vec(),
+                            sym.clone(),
+                            Slice::new(
+                                tokens.vec().clone(),
                                 tokens.range().start,
                                 EndIndex::I(tokens.range().start + 1),
                             ),
@@ -109,7 +108,13 @@ pub fn match_syms<'a>(syms: &'a Syms, tokens: &'a Slice<Token>) -> Option<SymMat
                     None
                 }
             }
-            Sym::Nonterm(nonterm) => match_syms(&nonterm.syms(), tokens),
+            Sym::Nonterm(nonterm) => {
+                if let Some(value) = match_syms(nonterm.syms(), tokens.clone()) {
+                    Some(value)
+                } else {
+                    None
+                }
+            }
         },
         Syms::Choices(choices) => {
             let mut index = 0;
@@ -118,7 +123,7 @@ pub fn match_syms<'a>(syms: &'a Syms, tokens: &'a Slice<Token>) -> Option<SymMat
             loop {
                 match choices.get(index) {
                     Some(syms) => {
-                        match_syms(&syms, tokens);
+                        match_syms(syms.clone(), tokens.clone());
                     }
                     None => break,
                 }
@@ -128,44 +133,3 @@ pub fn match_syms<'a>(syms: &'a Syms, tokens: &'a Slice<Token>) -> Option<SymMat
         }
     }
 }
-
-// pub fn match_symbols(
-//     symbols: &Vec<Symbol>,
-//     syms_index: usize,
-//     terminals: &Vec<Token>,
-//     terms_index: usize,
-// ) -> bool {
-//     println!("match_symbols()---->");
-//     match symbols.get(syms_index) {
-//         Some(symbol) => match symbol {
-//             Symbol::Terminal(terminal) => match terminals.get(terms_index) {
-//                 Some(token) => {
-//                     println!(
-//                         "Symbol[{}]: {:?},\nTerminals[{}]: {:?}",
-//                         syms_index, symbol, terms_index, token
-//                     );
-//                     if terminal.contains(&token.kind) {
-//                         if symbols.len() > syms_index + 1 && terminals.len() > terms_index + 1 {
-//                             match_symbols(symbols, syms_index + 1, terminals, terms_index + 1)
-//                         } else if symbols.len() == syms_index + 1
-//                             && terminals.len() == terms_index + 1
-//                         {
-//                             true
-//                         } else {
-//                             false
-//                         }
-//                     // must make symbols[1..], terminals[1..]
-//                     } else {
-//                         false
-//                     }
-//                 }
-//                 None => false,
-//             },
-//             Symbol::Nonterminal(nonterminal) => {
-//                 println!("Symbol[{}]: {:?}", syms_index, nonterminal,);
-//                 match_symbols(&nonterminal.symbols(), syms_index, terminals, terms_index)
-//             }
-//         },
-//         None => symbols.len() == syms_index && terminals.len() == terms_index,
-//     }
-// }
